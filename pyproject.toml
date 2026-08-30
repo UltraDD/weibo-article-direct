@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=80"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "weibo-article-direct"
+version = "0.1.0"
+description = "Owner-operated article publishing workflow with an explicit direct-session boundary"
+requires-python = ">=3.12"
+dependencies = [
+  "aiohttp>=3.10,<4",
+  "cryptography>=43,<51",
+  "playwright>=1.58,<2",
+]
+
+[project.scripts]
+weibo-article = "weibo_article_direct.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=9,<10", "ruff>=0.16,<0.17"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP", "RUF", "SIM", "PYI"]
+# Full-width punctuation in user-facing Chinese messages is intentional.
+ignore = ["RUF001"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers"
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

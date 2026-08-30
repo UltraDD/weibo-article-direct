@@ -1,0 +1,32 @@
+# Local runtime state and credentials
+.runtime/
+publisher-runtime/
+credentials*/
+cookies*/
+.env
+.env.*
+*.sqlite
+*.sqlite3
+*.db
+
+# Captures, diagnostics, and other material that must not enter a public repository
+*.har
+*.log
+*.pcap
+raw-captures/
+debug-output/
+
+# Local build output and recordings
+dist/
+build/
+assets/demo-source/
+
+# Python tooling caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
