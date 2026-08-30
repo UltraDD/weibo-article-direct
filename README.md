@@ -2,6 +2,8 @@
 
 > An independent, owner-operated CLI prototype for verified direct publishing of one Weibo headline article.
 
+[![CI](https://github.com/UltraDD/weibo-article-direct/actions/workflows/ci.yml/badge.svg)](https://github.com/UltraDD/weibo-article-direct/actions/workflows/ci.yml)
+
 [中文说明](#中文说明) · [Architecture](docs/architecture.md) · [Safety boundary](docs/safety-boundary.md) · [Authentication boundary](docs/authentication-boundary.md) · [Demo script](docs/demo-script.md) · [Release evidence](docs/release-evidence.md) · [Changelog](CHANGELOG.md)
 
 ## Why this exists
