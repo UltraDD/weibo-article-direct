@@ -11,7 +11,7 @@
 | Static checks | Lint and bytecode compilation pass | 2026-08-30: Ruff and `python -m compileall -q src` passed |
 | Credential scan | No session data, tokens, account IDs, raw captures, or real content in the intended public tree | 2026-08-30: manual publishable-tree scan passed; local build/cache output is ignored and excluded |
 | Manual CLI canary | One explicit synthetic article through QR login, followed by owner-side confirmation that it was published | 2026-08-31: passed with pure text; no retry; account, article ID, and URL withheld |
-| Body-media and cover canary | One explicit article with body media and cover, followed by fresh-read title verification | Pending public CLI rerun |
+| Body-media and cover canary | One explicit article with body media and cover, followed by fresh-read title verification | 2026-08-31: passed; owner confirmed both images were visible in the published article; no retry; identifiers withheld |
 | Package build | A wheel can be built from a clean source tree | 2026-08-30: `python -m pip wheel --no-deps --no-build-isolation . -w dist` passed |
 | CI definition | Fresh checkout can repeat lint, tests, and wheel build | 2026-08-31: private staging Actions run passed (lint, 14 tests, wheel build) |
 | Video evidence | Optional redacted owner-operated run showing submit-once and fresh-read result | Not required for v0.1.0 |
@@ -23,4 +23,4 @@ Only publish aggregate results, dates, release versions, and sanitized observati
 
 ## Example release statement
 
-> v0.1.0 passed offline contract tests and one owner-operated CLI canary with a synthetic pure-text article. The canary used one explicit submission attempt; the owner confirmed the article was published. The body-media and cover variant remains pending. No credentials, raw captures, or real identifiers are included in this repository.
+> v0.1.0 passed offline contract tests and two owner-operated CLI canaries: one synthetic pure-text article and one article with synthetic body media plus a cover. Each canary used one explicit submission attempt; the owner confirmed the published result and image visibility. No credentials, raw captures, or real identifiers are included in this repository.

@@ -104,7 +104,7 @@ assets/demo.gif     Optional redacted test-account recording
 
 ## Status
 
-Release candidate. The standalone CLI, offline request-contract tests, package build, remote CI, and one owner-controlled live CLI canary are complete. The candidate repository is currently private while the body-media and cover canary is pending.
+Release candidate. The standalone CLI, offline request-contract tests, package build, remote CI, and owner-controlled live canaries for both pure text and body media plus cover are complete. The candidate repository is ready for the visibility switch to public.
 
 ## License
 
