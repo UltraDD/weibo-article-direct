@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here.
 
-## 0.1.0 — release candidate
+## 0.1.0 — public release
 
 - Extracted the one-owner, one-article direct publishing workflow into an independent package.
 - Added visible QR login, in-memory session handling, draft creation, body-media staging, cover upload, final save, one-way submit, and fresh-read verification.

@@ -12,7 +12,7 @@ In 35–50 seconds, demonstrate that a single owner can publish one article thro
 2. Select **Article** and show a short, non-sensitive title and body. Use one harmless test image whose source can be published.
 3. Start the publish action and show the sequential progress states: draft, media staging, save, submit, fresh verification.
 4. Open the resulting article in a clean browser tab and show only the article title and public URL area after masking account identity.
-5. End on the repository name and the one-line positioning: owner-operated article publishing research prototype.
+5. End on the repository name and the one-line positioning: a focused CLI for direct HTTP publishing of one Weibo headline article.
 
 ## Editing rules
 

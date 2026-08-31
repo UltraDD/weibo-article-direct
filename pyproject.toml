@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "weibo-article-direct"
 version = "0.1.0"
-description = "Owner-operated article publishing workflow with an explicit direct-session boundary"
+description = "Focused CLI for direct HTTP publishing of one Weibo headline article"
 requires-python = ">=3.12"
 dependencies = [
   "aiohttp>=3.10,<4",

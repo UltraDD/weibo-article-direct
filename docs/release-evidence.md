@@ -15,7 +15,7 @@
 | Package build | A wheel can be built from a clean source tree | 2026-08-30: `python -m pip wheel --no-deps --no-build-isolation . -w dist` passed |
 | CI definition | Fresh checkout can repeat lint, tests, and wheel build | 2026-08-31: private staging Actions run passed (lint, 14 tests, wheel build) |
 | Video evidence | Optional redacted owner-operated run showing submit-once and fresh-read result | Not required for v0.1.0 |
-| Public README review | Claims, limitations, license, and screenshots match actual behavior | 2026-08-31: updated and reviewed; private staging state and media-canary boundary are explicit |
+| Public positioning review | Claims, limitations, prior art, license, and screenshots match actual behavior | 2026-08-31: reviewed; the README describes the direct-HTTP and reliability distinction without claiming official support or historical priority |
 
 ## Reporting rules
 
