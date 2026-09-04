@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import suppress
 from html import escape
 
 from .gateway import (
@@ -22,10 +23,28 @@ class ArticlePublisher:
         if not article.title.strip():
             return PublishResult(False, False, error_code="invalid_article")
 
+        draft_id = ""
+        submit_dispatched = False
+
+        async def cleanup_failed_draft() -> None:
+            """Delete the network draft when the flow failed before submitting.
+
+            The platform draft box has a hard capacity (30 on a standard
+            account, verified 2026-09-04); leftover drafts from failed runs
+            pile up until create_draft is rejected with 110002. Once the
+            submit request is dispatched the draft may already be an article,
+            so it is deliberately kept.
+            """
+            if not draft_id or submit_dispatched:
+                return
+            with suppress(Exception):
+                await self._gateway.delete_draft(draft_id)
+
         try:
             created = await self._gateway.create_draft()
             failure = _failure("create", created)
             if failure:
+                await cleanup_failed_draft()
                 return failure
             draft_id = str(created.data.get("id") or "")
             if not draft_id:
@@ -41,6 +60,7 @@ class ArticlePublisher:
             )
             failure = _failure("save_initial", initial)
             if failure:
+                await cleanup_failed_draft()
                 return failure
 
             uploaded: dict[str, str] = {}
@@ -60,12 +80,14 @@ class ArticlePublisher:
             )
             failure = _failure("save_body", body_saved)
             if failure:
+                await cleanup_failed_draft()
                 return failure
 
             cover_url = ""
             if article.cover_path:
                 failure = await self._upload_and_attach(article.cover_path, uploaded)
                 if failure:
+                    await cleanup_failed_draft()
                     return failure
                 cover_url = uploaded[article.cover_path]
 
@@ -79,17 +101,20 @@ class ArticlePublisher:
             )
             failure = _failure("save_final", final_saved)
             if failure:
+                await cleanup_failed_draft()
                 return failure
 
             loaded = await self._gateway.load_draft(draft_id)
             failure = _failure("load", loaded)
             if failure:
+                await cleanup_failed_draft()
                 return failure
 
             submitted = await self._gateway.submit_draft(draft_id, article.title)
             failure = _failure("submit", submitted)
             if failure:
                 return failure
+            submit_dispatched = True
             remote_id = str(submitted.data.get("object_id") or "").split(":")[-1] or None
             remote_url = str(submitted.data.get("url") or "") or None
             if not remote_id:
@@ -105,6 +130,7 @@ class ArticlePublisher:
             )
             failure = _failure("verify", verified)
             if failure:
+                await cleanup_failed_draft()
                 return failure
             return PublishResult(True, True, remote_id=remote_id, remote_url=remote_url)
         except DirectWriteIndeterminate:
@@ -136,7 +162,9 @@ def _failure(step: str, response: GatewayResponse) -> PublishResult | None:
     if response.blocked:
         return PublishResult(False, False, blocked=True, error_code="security_challenge", diagnostics={"step": step})
     if str(response.code) not in _SUCCESS_CODES:
-        return PublishResult(False, False, error_code="platform_rejected", diagnostics={"step": step, "code": str(response.code)})
+        # 110002 = draft box full (capacity 30); give an actionable error.
+        error_code = "draft_box_full" if str(response.code) == "110002" else "platform_rejected"
+        return PublishResult(False, False, error_code=error_code, diagnostics={"step": step, "code": str(response.code)})
     return None
 
 

@@ -88,9 +88,14 @@ class OwnerHttpClient:
                 headers=headers,
                 allow_redirects=False,
             ) as response:
-                body_text = (await response.text())[:2000]
-                payload = _decode_json(body_text, response.headers.get("Content-Type", ""))
-                return HttpResponse(response.status, payload=payload, body_text=body_text)
+                raw_text = await response.text()
+                # Parse the full body first: draft load/save responses embed the
+                # whole article (several KB) and truncating before decoding turns
+                # valid success responses into parse failures.
+                payload = _decode_json(raw_text, response.headers.get("Content-Type", ""))
+                return HttpResponse(
+                    response.status, payload=payload, body_text=raw_text[:2000]
+                )
         except TimeoutError as exc:
             raise DirectWriteIndeterminate("request timed out after dispatch") from exc
         except aiohttp.ClientError as exc:

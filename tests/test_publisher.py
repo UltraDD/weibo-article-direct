@@ -128,3 +128,89 @@ def test_WHEN_submit_ack_lacks_remote_id_THEN_reports_indeterminate_without_veri
     assert result.diagnostics == {"step": "submit", "reason": "missing_remote_id"}
     assert "verify" not in [name for name, _ in gateway.calls]
     assert [name for name, _ in gateway.calls].count("submit") == 1
+
+
+def test_WHEN_save_is_rejected_THEN_leftover_network_draft_is_deleted():
+    """Regression 2026-09-04: failed runs left network drafts until the
+    platform draft box (capacity 30) filled up and create was rejected
+    with 110002. Failures before submit must delete the draft."""
+
+    class CleanupGateway(FakeGateway):
+        def __init__(self) -> None:
+            super().__init__()
+            self.deleted: list[str] = []
+
+        async def save_draft(self, draft_id: str, **fields: str) -> GatewayResponse:
+            self.calls.append(("save", {"id": draft_id, **fields}))
+            if fields.get("action") == "2":
+                return GatewayResponse(code="100001", message="save rejected")
+            return GatewayResponse(code="100000")
+
+        async def delete_draft(self, draft_id: str) -> GatewayResponse:
+            self.deleted.append(draft_id)
+            return GatewayResponse(code="100000")
+
+        async def draft_usage(self) -> tuple[int, int]:
+            return (1, 30)
+
+    gateway = CleanupGateway()
+    result = asyncio.run(
+        ArticlePublisher(gateway).publish(
+            Article(title="A test article", blocks=(ArticleBlock.paragraph("Body"),))
+        )
+    )
+    assert result.accepted is False
+    assert result.error_code == "platform_rejected"
+    assert gateway.deleted == ["draft-1"]
+
+
+def test_WHEN_publish_succeeds_THEN_network_draft_is_not_deleted():
+    """A dispatched submit may already be an article; the draft is kept."""
+
+    class SuccessGateway(FakeGateway):
+        def __init__(self) -> None:
+            super().__init__()
+            self.deleted: list[str] = []
+
+        async def delete_draft(self, draft_id: str) -> GatewayResponse:
+            self.deleted.append(draft_id)
+            return GatewayResponse(code="100000")
+
+        async def draft_usage(self) -> tuple[int, int]:
+            return (1, 30)
+
+    gateway = SuccessGateway()
+    result = asyncio.run(
+        ArticlePublisher(gateway).publish(
+            Article(title="A test article", blocks=(ArticleBlock.paragraph("Body"),))
+        )
+    )
+    assert result.accepted and result.verified
+    assert gateway.deleted == []
+
+
+def test_WHEN_create_returns_110002_THEN_error_is_draft_box_full():
+    """The full draft box must surface as an actionable draft_box_full."""
+
+    class FullBoxGateway(FakeGateway):
+        def __init__(self) -> None:
+            super().__init__()
+            self.deleted: list[str] = []
+
+        async def create_draft(self) -> GatewayResponse:
+            return GatewayResponse(code="110002", message="最大草稿个数达到上限")
+
+        async def delete_draft(self, draft_id: str) -> GatewayResponse:
+            self.deleted.append(draft_id)
+            return GatewayResponse(code="100000")
+
+        async def draft_usage(self) -> tuple[int, int]:
+            return (30, 30)
+
+    result = asyncio.run(
+        ArticlePublisher(FullBoxGateway()).publish(
+            Article(title="A test article", blocks=(ArticleBlock.paragraph("Body"),))
+        )
+    )
+    assert result.accepted is False
+    assert result.error_code == "draft_box_full"

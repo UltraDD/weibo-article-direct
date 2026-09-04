@@ -39,3 +39,11 @@ class ArticleGateway(Protocol):
         expected_title: str,
         remote_url: str | None = None,
     ) -> GatewayResponse: ...
+
+    async def delete_draft(self, draft_id: str) -> GatewayResponse:
+        """Delete a leftover network draft; failure is safe to ignore."""
+        ...
+
+    async def draft_usage(self) -> tuple[int, int]:
+        """Return (used, capacity) of the platform draft box."""
+        ...

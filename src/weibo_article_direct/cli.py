@@ -103,6 +103,9 @@ async def _publish(args: argparse.Namespace) -> int:
     if result.blocked:
         print("平台要求额外验证；CLI 已停止。", file=sys.stderr)
         return 4
+    if result.error_code == "draft_box_full":
+        print("发布未完成：微博草稿箱已满（110002）。请打开微博头条文章草稿箱删除部分草稿后重试。", file=sys.stderr)
+        return 1
     print(f"发布未完成：{result.error_code or 'platform_rejected'}。", file=sys.stderr)
     return 1
 

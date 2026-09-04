@@ -14,6 +14,8 @@ from .request_id import build_request_id
 _CREATE_PATH = "/article/v5/aj/editor/draft/create"
 _SAVE_PATH = "/article/v5/aj/editor/draft/save"
 _LOAD_PATH = "/article/v5/aj/editor/draft/load"
+_DRAFT_DELETE_PATH = "/article/v5/aj/editor/draft/delete"
+_DRAFT_LIST_PATH = "/article/v5/aj/editor/draft/list"
 _PUBLISH_PATH = "/article/v5/aj/editor/draft/publish"
 _ATTACH_PATH = "/article/v5/aj/editor/plugins/uploadpic"
 _UPLOAD_URL = "https://picupload.weibo.com/interface/pic_upload.php"
@@ -103,6 +105,27 @@ class LiveArticleGateway:
             form={"pid": pid, "uid": self._uid},
         )
         return _normalize(response)
+
+    async def delete_draft(self, draft_id: str) -> GatewayResponse:
+        response = await self._http.request(
+            "POST",
+            f"{CARD_ORIGIN}{_DRAFT_DELETE_PATH}",
+            params={"uid": self._uid, "_rid": self._rid()},
+            form={"uid": self._uid, "id": draft_id},
+        )
+        return _normalize(response)
+
+    async def draft_usage(self) -> tuple[int, int]:
+        response = await self._http.request(
+            "POST",
+            f"{CARD_ORIGIN}{_DRAFT_LIST_PATH}",
+            params={"uid": self._uid},
+            form={"uid": self._uid},
+        )
+        normalized = _normalize(response)
+        used = int(normalized.data.get("count") or 0)
+        cap = int(normalized.data.get("max_count") or 30)
+        return used, cap
 
     async def load_draft(self, draft_id: str) -> GatewayResponse:
         response = await self._http.request(
